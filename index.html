@@ -140,7 +140,7 @@ function rOut(){const C=calc(),T=C.T;
   sm('Courier charges',m(T.cour))+sm('Condition charges',m(T.cond))+sm('Local transport',m(T.loc))+sm('Direct expenses',m(T.dir));
  document.getElementById('report').innerHTML=C.P.length?C.P.map(i=>`<div class="card pc"><h3>${esc(i.p.name||'Unnamed product')}</h3>
  <div class="meta">${esc(i.sh.name||'Unnamed shop')} · Purchased ${i.qty} · In packages ${i.asg} · Carried ${i.carried}</div>
- <div class="hl"><div class="blue"><small>Purchase cost / piece</small><b>${m(i.price)}</b></div><div class="green"><small>Landed cost / piece</small><b>${m(i.lpp)}</b></div></div>
+ <div class="hl"><div class="blue"><small>Purchase cost / piece (after discount)</small><b>${m(i.qty?i.net/i.qty:0)}</b><small>Original price: ${m(i.price)}</small></div><div class="green"><small>Landed cost / piece</small><b>${m(i.lpp)}</b></div></div>
  ${ln('<small>Cost item</small>','<small>Whole cost · Per piece</small>')}${lp('Original purchase cost',i.orig,i.qty)}${lp('Shop discount',i.disc,i.qty,'neg')}${lp('Net purchase cost',i.net,i.qty)}${lp('Trip expense allocation',i.trip,i.qty)}${lp('Courier charge allocation',i.cour,i.qty)}${lp('Condition charge allocation',i.cond,i.qty)}${lp('Local transport allocation',i.loc,i.qty)}${lp('Direct expenses',i.dir,i.qty)}${lp('Total landed cost',i.landed,i.qty,'tot')}
  </div>`).join(''):'<div class="card empty" style="grid-column:1/-1">Add a shop and products to see landed costs.</div>';
  hints(C);
@@ -177,7 +177,7 @@ function ask(msg,fn){const M=document.getElementById('modal');document.getElemen
 const has={shops:()=>S.shops.length,trip:()=>Object.values(S.trip).some(v=>v!==''),packages:()=>S.packages.length,direct:()=>S.direct.length};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const d=b.dataset;
  const A={
-  addShop:()=>S.shops.push({id:uid(),name:'',dtype:'pct',dval:'',products:[{id:uid(),name:'',qty:'',price:''}]}),
+  addShop:()=>S.shops.push({id:uid(),name:'',dtype:'fixed',dval:'',products:[{id:uid(),name:'',qty:'',price:''}]}),
   delShop:()=>S.shops=S.shops.filter(s=>s.id!==d.id),
   addProd:()=>S.shops.find(s=>s.id===d.id).products.push({id:uid(),name:'',qty:'',price:''}),
   delProd:()=>S.shops.forEach(s=>s.products=s.products.filter(p=>p.id!==d.id)),
