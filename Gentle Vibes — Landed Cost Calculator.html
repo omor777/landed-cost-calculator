@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gentle Vibes — Landed Cost Calculator</title>
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--ink:#1c2433;--mut:#6b7585;--bd:#e3e8f0;--blue:#1d4ed8;--bluebg:#eaf1ff;--green:#15803d;--greenbg:#e8f7ee;--red:#c0392b;--redbg:#fdeeec;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10141c;--card:#181e29;--ink:#e8ecf3;--mut:#94a0b4;--bd:#2a3342;--bluebg:#16264d;--greenbg:#12301f;--redbg:#3a1a17;--blue:#7ba3ff;--green:#5fd08a;--red:#ff8a7a;color-scheme:dark}}
+*{box-sizing:border-box}html{scroll-padding-top:12px}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:14px}
+header h1{margin:4px 0 2px;font-size:22px}header p{margin:0;color:var(--mut)}
+nav{display:flex;gap:8px;overflow-x:auto;padding:12px 0}
+nav a{white-space:nowrap;padding:8px 14px;border:1px solid var(--bd);border-radius:20px;background:var(--card);color:var(--ink);text-decoration:none;font-size:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin:14px 0;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.sh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+h2{margin:0;font-size:18px}h3{margin:0;font-size:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.rep{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.sm{border:1px solid var(--bd);border-radius:12px;padding:10px}.sm small{display:block;color:var(--mut);font-size:12px}.sm b{font-size:17px}
+.grand{grid-column:1/-1;background:var(--greenbg);border-color:var(--green)}.grand b{font-size:28px;color:var(--green)}
+.sub{border:1px solid var(--bd);border-radius:12px;padding:12px;margin:10px 0;background:var(--bg)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin:8px 0}
+.f{display:flex;flex-direction:column;gap:3px;flex:1 1 130px;min-width:0}.f label{font-size:12px;color:var(--mut)}
+input,select{width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+input.req:placeholder-shown{border-color:var(--red)}
+button{min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+button.pri{background:var(--blue);color:#fff;border-color:var(--blue)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.pri{color:#10141c}}
+button.del{color:var(--red)}button.ghost{font-size:13px;min-height:36px}
+.hint{font-size:12.5px;color:var(--mut)}.err{color:var(--red)}
+.empty{text-align:center;color:var(--mut);padding:24px}
+.hl{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.hl div{flex:1 1 120px;border-radius:12px;padding:10px}.hl small{display:block;font-size:12px}.hl b{font-size:22px}
+.blue{background:var(--bluebg);color:var(--blue)}.green{background:var(--greenbg);color:var(--green)}
+.pc{margin:0}.pc .meta{color:var(--mut);font-size:13px}
+.ln{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed var(--bd)}
+.ln.neg span:last-child{color:var(--red)}.ln.tot{font-weight:700;border-bottom:0;border-top:2px solid var(--bd);margin-top:4px}
+.note{font-size:12.5px;color:var(--mut);text-align:center;margin:20px 0}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:9}
+#modal div{background:var(--card);padding:20px;border-radius:14px;max-width:360px;width:100%}
+#modal .row{justify-content:flex-end}
+.banner{background:var(--redbg);color:var(--red);padding:10px;border-radius:10px;margin:10px 0}
+</style></head><body><div class="wrap">
+<header><h1>🧥 Gentle Vibes — Landed Cost Calculator</h1><p>Real cost per piece after discounts, trip, courier and direct expenses (৳ BDT)</p></header>
+<div id="banner"></div>
+<nav><a href="#summary">Summary</a><a href="#s-shops">Shops &amp; Products</a><a href="#s-trip">Trip</a><a href="#s-pk">Packages</a><a href="#s-dir">Direct</a><a href="#s-rep">Report</a></nav>
+
+<section class="card" id="summary"><div class="sh"><h2>Grand Summary</h2><button class="ghost del" data-a="resetAll">Reset Everything</button></div><div class="grid" id="sumgrid"></div></section>
+<section class="card" id="s-shops"><div class="sh"><h2>1. Shops &amp; Products</h2><button class="ghost del" data-a="reset" data-s="shops">Reset</button></div><div id="shops"></div><button class="pri" data-a="addShop">+ Add shop</button></section>
+<section class="card" id="s-trip"><div class="sh"><h2>2. Trip Expenses</h2><button class="ghost del" data-a="reset" data-s="trip">Reset</button></div><div id="trip"></div><p class="hint">Shared across all products in proportion to net purchase value.</p></section>
+<section class="card" id="s-pk"><div class="sh"><h2>3. Courier Packages</h2><button class="ghost del" data-a="reset" data-s="packages">Reset</button></div><div id="pks"></div><button class="pri" data-a="addPkg">+ Add package</button></section>
+<section class="card" id="s-dir"><div class="sh"><h2>4. Direct Expenses</h2><button class="ghost del" data-a="reset" data-s="direct">Reset</button></div><div id="dirs"></div><button class="pri" data-a="addDir">+ Add direct expense</button></section>
+<section id="s-rep"><h2 style="margin-top:20px">5. Product-wise Landed Cost</h2><div class="rep" id="report"></div></section>
+<p class="note">Everything saves automatically in this browser on this device. Clearing browser data may delete it. Amounts are shown rounded to the nearest whole taka; calculations use full precision.</p>
+</div>
+<div id="modal"><div><p id="mmsg"></p><div class="row"><button id="mno">Cancel</button><button class="pri del" id="myes">Confirm</button></div></div></div>
+<script>
+const KEY='gentlevibes.landed.v1';let notice='';
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const n=v=>{const x=parseFloat(v);return isFinite(x)&&x>0?x:0};
+const q=v=>Math.floor(n(v));
+const m=x=>'৳'+(Math.max(0,Math.round(x+1e-9))+0).toLocaleString('en-IN');
+const blankTrip=()=>({transport:'',hotel:'',food:''});
+const blank=()=>({v:1,shops:[],trip:blankTrip(),packages:[],direct:[]});
+function load(){try{const r=localStorage.getItem(KEY);if(!r)return blank();const d=JSON.parse(r);
+ if(d&&d.v===1&&Array.isArray(d.shops)&&Array.isArray(d.packages)&&Array.isArray(d.direct)&&d.trip)return d;throw 0}
+ catch(e){try{localStorage.setItem(KEY+'.corrupt',localStorage.getItem(KEY)||'')}catch(_){}
+ notice='Saved data could not be read. A backup copy was kept and the calculator started fresh.';return blank()}}
+let S=load(),timer;
+function save(){clearTimeout(timer);timer=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},250)}
+const allProds=()=>S.shops.flatMap(s=>s.products.map(p=>({p,s})));
+
+function normalize(){
+ const ids=new Set(allProds().map(x=>x.p.id));
+ S.packages.forEach(k=>k.items=k.items.filter(i=>ids.has(i.pid)));
+ S.direct=S.direct.filter(d=>!d.pid||ids.has(d.pid));
+ allProds().forEach(({p})=>{let r=q(p.qty);
+  S.packages.forEach(k=>k.items.forEach(i=>{if(i.pid!==p.id)return;const v=Math.min(q(i.qty),r);if(i.qty!==''&&q(i.qty)!==v)i.qty=v;r-=v}))});
+}
+// ---------- calculation engine (full precision) ----------
+function calc(){
+ const P=[],byId={},shopTot={},shopDisc={};
+ S.shops.forEach(sh=>{
+  const it=sh.products.map(p=>({p,sh,qty:q(p.qty),price:n(p.price),orig:q(p.qty)*n(p.price),asg:0,trip:0,cour:0,cond:0,loc:0,dir:0}));
+  const tot=it.reduce((a,i)=>a+i.orig,0);
+  const d=sh.dtype==='pct'?tot*Math.min(n(sh.dval),100)/100:Math.min(n(sh.dval),tot);
+  shopTot[sh.id]=tot;shopDisc[sh.id]=d;
+  it.forEach(i=>{i.disc=tot?d*i.orig/tot:0;i.net=i.orig-i.disc;P.push(i);byId[i.p.id]=i});
+ });
+ const totNet=P.reduce((a,i)=>a+i.net,0),T=n(S.trip.transport)+n(S.trip.hotel)+n(S.trip.food);
+ P.forEach(i=>i.trip=totNet?T*i.net/totNet:0);
+ S.packages.forEach(k=>{
+  const rows=k.items.map(x=>{const i=byId[x.pid],c=q(x.qty);if(i)i.asg+=c;return i&&i.qty?{i,v:i.net*c/i.qty}:null}).filter(Boolean);
+  const pv=rows.reduce((a,r)=>a+r.v,0),c=n(k.courier),d=n(k.cond),l=n(k.local);
+  if(pv>0)rows.forEach(r=>{const f=r.v/pv;r.i.cour+=c*f;r.i.cond+=d*f;r.i.loc+=l*f});
+ });
+ S.direct.forEach(d=>{if(byId[d.pid])byId[d.pid].dir+=n(d.amount)});
+ const sum=f=>P.reduce((a,i)=>a+f(i),0);
+ P.forEach(i=>{i.carried=i.qty-i.asg;i.landed=i.net+i.trip+i.cour+i.cond+i.loc+i.dir;i.lpp=i.qty?i.landed/i.qty:0});
+ const tq=sum(i=>i.qty),land=sum(i=>i.landed);
+ return{P,byId,shopTot,shopDisc,T:{tq,land,orig:sum(i=>i.orig),disc:sum(i=>i.disc),net:totNet,
+  tr:n(S.trip.transport),ho:n(S.trip.hotel),fo:n(S.trip.food),cour:sum(i=>i.cour),cond:sum(i=>i.cond),loc:sum(i=>i.loc),dir:sum(i=>i.dir),avg:tq?land/tq:0}};
+}
+// ---------- rendering ----------
+const fld=(l,attrs,val,cls='',type='number')=>`<div class="f"><label>${l}</label><input class="${cls}" type="${type}" ${type==='number'?'min="0" inputmode="decimal" step="any"':''} placeholder="${type==='number'?'0':l}" value="${esc(val)}" ${attrs}></div>`;
+function rShops(){const el=document.getElementById('shops');
+ if(!S.shops.length){el.innerHTML='<div class="empty">No shops yet. Add your first wholesale shop to begin.</div>';return}
+ el.innerHTML=S.shops.map(s=>`<div class="sub"><div class="row">${fld('Shop name',`data-t="shop" data-id="${s.id}" data-f="name"`,s.name,'req','text')}
+ <div class="f"><label>Discount type</label><select data-t="shop" data-id="${s.id}" data-f="dtype"><option value="pct" ${s.dtype==='pct'?'selected':''}>Percentage (%)</option><option value="fixed" ${s.dtype==='fixed'?'selected':''}>Fixed (৳)</option></select></div>
+ ${fld('Discount',`data-t="shop" data-id="${s.id}" data-f="dval"`,s.dval)}
+ <button class="del" data-a="delShop" data-id="${s.id}">Remove shop</button></div><div class="hint" id="w-${s.id}"></div>
+ ${s.products.map(p=>`<div class="row">${fld('Product',`data-t="prod" data-id="${p.id}" data-f="name"`,p.name,'req','text')}${fld('Qty',`data-t="prod" data-id="${p.id}" data-f="qty" step="1"`,p.qty,'req')}${fld('Unit price ৳',`data-t="prod" data-id="${p.id}" data-f="price"`,p.price,'req')}<button class="del" data-a="delProd" data-id="${p.id}" aria-label="Remove product">✕</button></div>`).join('')}
+ <button data-a="addProd" data-id="${s.id}">+ Add product</button></div>`).join('')}
+function rTrip(){document.getElementById('trip').innerHTML=`<div class="row">${fld('Transportation cost ৳','data-t="trip" data-f="transport"',S.trip.transport)}${fld('Hotel rent ৳','data-t="trip" data-f="hotel"',S.trip.hotel)}${fld('Food expenses ৳','data-t="trip" data-f="food"',S.trip.food)}</div>`}
+const pname=(p,s)=>(p.name||'Unnamed product')+' — '+(s.name||'Unnamed shop');
+function rPk(){const el=document.getElementById('pks');
+ if(!S.packages.length){el.innerHTML='<div class="empty">No packages. Products not assigned to a package are treated as personally carried.</div>';return}
+ const asg={};S.packages.forEach(k=>k.items.forEach(i=>asg[i.pid]=(asg[i.pid]||0)+q(i.qty)));
+ el.innerHTML=S.packages.map(k=>{
+  const avail=allProds().filter(({p})=>!k.items.some(i=>i.pid===p.id)&&q(p.qty)-(asg[p.id]||0)>0);
+  const AP=Object.fromEntries(allProds().map(x=>[x.p.id,x]));
+  return `<div class="sub"><div class="row">${fld('Package name',`data-t="pkg" data-id="${k.id}" data-f="name"`,k.name,'req','text')}<button class="del" data-a="delPkg" data-id="${k.id}">Remove package</button></div>
+  <div class="row">${fld('Courier charge ৳',`data-t="pkg" data-id="${k.id}" data-f="courier"`,k.courier)}${fld('Condition charge ৳',`data-t="pkg" data-id="${k.id}" data-f="cond"`,k.cond)}${fld('Local transport ৳',`data-t="pkg" data-id="${k.id}" data-f="local"`,k.local)}</div>
+  <div class="hint err" id="pw-${k.id}"></div>
+  ${k.items.map(i=>{const x=AP[i.pid];return `<div class="row">${fld(x?pname(x.p,x.s):'Product',`data-t="pitem" data-id="${k.id}" data-pid="${i.pid}" data-f="qty" step="1"`,i.qty,'req')}<div class="hint" data-rem="${i.pid}" style="flex:1 1 140px"></div><button class="del" data-a="delItem" data-id="${k.id}" data-pid="${i.pid}" aria-label="Remove">✕</button></div>`}).join('')}
+  <div class="row"><div class="f"><label>Add product to package</label><select id="sel-${k.id}">${avail.length?avail.map(({p,s})=>`<option value="${p.id}">${esc(pname(p,s))}</option>`).join(''):'<option value="">No unassigned quantity left</option>'}</select></div><button data-a="addItem" data-id="${k.id}">Add</button></div></div>`}).join('')}
+function rDir(){const el=document.getElementById('dirs');
+ if(!S.direct.length){el.innerHTML='<div class="empty">No direct expenses (optional).</div>';return}
+ el.innerHTML=S.direct.map(d=>`<div class="sub"><div class="row"><div class="f"><label>Product</label><select data-t="dir" data-id="${d.id}" data-f="pid"><option value="">Select product…</option>${allProds().map(({p,s})=>`<option value="${p.id}" ${d.pid===p.id?'selected':''}>${esc(pname(p,s))}</option>`).join('')}</select></div>
+ ${fld('Description (optional)',`data-t="dir" data-id="${d.id}" data-f="desc"`,d.desc,'','text')}${fld('Amount ৳',`data-t="dir" data-id="${d.id}" data-f="amount"`,d.amount)}<button class="del" data-a="delDir" data-id="${d.id}" aria-label="Remove">✕</button></div>${d.pid?'':'<div class="hint err">Choose a product — unassigned expenses are ignored.</div>'}</div>`).join('')}
+const ln=(a,b,c='')=>`<div class="ln ${c}"><span>${a}</span><span>${b}</span></div>`;
+const lp=(a,v,qty,c='')=>`<div class="ln ${c}"><span>${a}</span><span>${c==='neg'?'-':''}${m(v)} <small style="color:var(--mut)">· ${c==='neg'?'-':''}${m(qty?v/qty:0)}/pc</small></span></div>`;
+function rOut(){const C=calc(),T=C.T;
+ const sm=(l,v,c='')=>`<div class="sm ${c}"><small>${l}</small><b>${v}</b></div>`;
+ document.getElementById('sumgrid').innerHTML=`<div class="sm grand"><small>Grand Total Landed Cost</small><b>${m(T.land)}</b></div>`+
+  sm('Average landed cost / piece',m(T.avg))+sm('Total shops',S.shops.length)+sm('Total products',C.P.length)+sm('Total quantity',T.tq)+
+  sm('Original purchase cost',m(T.orig))+sm('Total shop discount','-'+m(T.disc))+sm('Net purchase cost',m(T.net))+
+  sm('Trip transportation',m(T.tr))+sm('Hotel rent',m(T.ho))+sm('Food expenses',m(T.fo))+
+  sm('Courier charges',m(T.cour))+sm('Condition charges',m(T.cond))+sm('Local transport',m(T.loc))+sm('Direct expenses',m(T.dir));
+ document.getElementById('report').innerHTML=C.P.length?C.P.map(i=>`<div class="card pc"><h3>${esc(i.p.name||'Unnamed product')}</h3>
+ <div class="meta">${esc(i.sh.name||'Unnamed shop')} · Purchased ${i.qty} · In packages ${i.asg} · Carried ${i.carried}</div>
+ <div class="hl"><div class="blue"><small>Purchase cost / piece</small><b>${m(i.price)}</b></div><div class="green"><small>Landed cost / piece</small><b>${m(i.lpp)}</b></div></div>
+ ${ln('<small>Cost item</small>','<small>Whole cost · Per piece</small>')}${lp('Original purchase cost',i.orig,i.qty)}${lp('Shop discount',i.disc,i.qty,'neg')}${lp('Net purchase cost',i.net,i.qty)}${lp('Trip expense allocation',i.trip,i.qty)}${lp('Courier charge allocation',i.cour,i.qty)}${lp('Condition charge allocation',i.cond,i.qty)}${lp('Local transport allocation',i.loc,i.qty)}${lp('Direct expenses',i.dir,i.qty)}${lp('Total landed cost',i.landed,i.qty,'tot')}
+ </div>`).join(''):'<div class="card empty" style="grid-column:1/-1">Add a shop and products to see landed costs.</div>';
+ hints(C);
+}
+function hints(C){C=C||calc();
+ S.shops.forEach(s=>{const el=document.getElementById('w-'+s.id);if(!el)return;const t=C.shopTot[s.id];
+  const bad=s.dtype==='pct'?n(s.dval)>100:n(s.dval)>t;
+  el.textContent=bad?'Discount exceeds the shop’s purchase value — capped at '+m(t):'Shop purchase value '+m(t)+' · discount '+m(C.shopDisc[s.id]);el.className='hint'+(bad?' err':'')});
+ document.querySelectorAll('[data-rem]').forEach(el=>{const i=C.byId[el.dataset.rem];if(i)el.textContent='Remaining unassigned: '+(i.qty-i.asg)+' of '+i.qty+' (carried personally)'});
+ S.packages.forEach(k=>{const el=document.getElementById('pw-'+k.id);if(el)el.textContent=k.items.length?'':'Add products — this package’s expenses are not allocated yet.'});
+}
+const fullRender=()=>{rShops();rTrip();rPk();rDir();update()};
+function update(){normalize();save();rOut()}
+// ---------- events ----------
+document.addEventListener('input',e=>{const t=e.target,d=t.dataset;if(!d.t)return;let o;
+ if(d.t==='shop')o=S.shops.find(x=>x.id===d.id);
+ else if(d.t==='prod')o=allProds().find(x=>x.p.id===d.id)?.p;
+ else if(d.t==='trip')o=S.trip;
+ else if(d.t==='pkg')o=S.packages.find(x=>x.id===d.id);
+ else if(d.t==='pitem')o=S.packages.find(x=>x.id===d.id)?.items.find(i=>i.pid===d.pid);
+ else if(d.t==='dir')o=S.direct.find(x=>x.id===d.id);
+ if(!o)return;let v=t.value;
+ if(t.type==='number'&&v!==''){if(parseFloat(v)<0){v='0';t.value=v}if(t.step==='1'&&v.includes('.')){v=String(Math.floor(parseFloat(v)));t.value=v}}
+ if(d.t==='pitem'&&v!==''){const p=allProds().find(x=>x.p.id===d.pid)?.p;
+  const others=S.packages.reduce((a,k)=>a+k.items.filter(i=>i.pid===d.pid&&i!==o).reduce((b,i)=>b+q(i.qty),0),0);
+  const max=Math.max(0,q(p?.qty)-others);if(q(v)>max){v=String(max);t.value=v}}
+ o[d.f]=v;update();
+ if(d.t==='shop'||d.t==='prod'){rPk();rDir();hints()}
+ if(d.t==='prod'&&d.f==='qty')rPk(),hints();
+});
+function ask(msg,fn){const M=document.getElementById('modal');document.getElementById('mmsg').textContent=msg;M.style.display='flex';
+ document.getElementById('mno').onclick=()=>M.style.display='none';
+ document.getElementById('myes').onclick=()=>{M.style.display='none';fn()}}
+const has={shops:()=>S.shops.length,trip:()=>Object.values(S.trip).some(v=>v!==''),packages:()=>S.packages.length,direct:()=>S.direct.length};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const d=b.dataset;
+ const A={
+  addShop:()=>S.shops.push({id:uid(),name:'',dtype:'pct',dval:'',products:[{id:uid(),name:'',qty:'',price:''}]}),
+  delShop:()=>S.shops=S.shops.filter(s=>s.id!==d.id),
+  addProd:()=>S.shops.find(s=>s.id===d.id).products.push({id:uid(),name:'',qty:'',price:''}),
+  delProd:()=>S.shops.forEach(s=>s.products=s.products.filter(p=>p.id!==d.id)),
+  addPkg:()=>S.packages.push({id:uid(),name:'Package '+String(S.packages.length+1).padStart(2,'0'),courier:'',cond:'',local:'',items:[]}),
+  delPkg:()=>S.packages=S.packages.filter(k=>k.id!==d.id),
+  addItem:()=>{const v=document.getElementById('sel-'+d.id).value;if(v)S.packages.find(k=>k.id===d.id).items.push({pid:v,qty:'1'})},
+  delItem:()=>{const k=S.packages.find(k=>k.id===d.id);k.items=k.items.filter(i=>i.pid!==d.pid)},
+  addDir:()=>S.direct.push({id:uid(),pid:'',desc:'',amount:''}),
+  delDir:()=>S.direct=S.direct.filter(x=>x.id!==d.id)};
+ if(A[d.a]){const del=['delShop','delProd','delPkg'].includes(d.a);
+  const go=()=>{A[d.a]();fullRender()};del?ask('Remove this item? Related allocations will be updated.',go):go();return}
+ if(d.a==='reset'){const s=d.s;if(!has[s]())return;
+  ask('Reset this section? Its data will be lost.',()=>{if(s==='trip')S.trip=blankTrip();else S[s]=[];fullRender()})}
+ if(d.a==='resetAll')ask('Reset EVERYTHING? All shops, packages and expenses will be permanently cleared.',()=>{S=blank();fullRender()});
+});
+if(notice)document.getElementById('banner').innerHTML='<div class="banner">'+notice+'</div>';
+fullRender();
+</script></body></html>
